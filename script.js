@@ -1,4 +1,38 @@
 document.getElementById('yr').textContent = new Date().getFullYear();
+const HQ = [41.7606, -88.3201]; // Aurora, IL
+const towns = [
+  { name: 'Naperville', pos: [41.7508, -88.1535], mi: '~9 mi' },
+  { name: 'North Aurora', pos: [41.7803, -88.3454], mi: '~5 mi' },
+  { name: 'Oswego', pos: [41.6828, -88.3487], mi: '~8 mi' },
+  { name: 'Plainfield', pos: [41.6023, -88.2073], mi: '~13 mi' },
+  { name: 'Bolingbrook', pos: [41.6986, -88.0687], mi: '~15 mi' }
+];
+
+const serviceMap = L.map('serviceMap', { scrollWheelZoom: false }).setView(HQ, 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(serviceMap);
+
+const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#3c5943';
+
+L.circle(HQ, {
+  radius: 15 * 1609.34,
+  color: accentColor,
+  weight: 1.5,
+  dashArray: '6 5',
+  fillColor: accentColor,
+  fillOpacity: 0.06
+}).addTo(serviceMap);
+
+L.marker(HQ).addTo(serviceMap)
+  .bindPopup('<b>MNK Remodeling</b><br>Aurora, IL — home base')
+  .openPopup();
+
+towns.forEach(t => {
+  L.marker(t.pos).addTo(serviceMap)
+    .bindPopup(`<b>${t.name}</b><br>${t.mi} from HQ`);
+});
 
 /* ---------------- service data ---------------- */
 const services = [
