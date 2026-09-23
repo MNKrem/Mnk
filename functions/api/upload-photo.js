@@ -131,16 +131,51 @@ class GitHub {
     return { content: atob(data.content.replace(/\n/g, "")), sha: data.sha };
   }
   async putFile(path, base64Content, message, sha) {
-    const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${path}`, {
+    let currentSha = sha;
+
+    const attempt = async () => fetch(`https://api.github.com/repos/${this.repo}/contents/${path}`, {
       method: "PUT",
       headers: this._headers(),
       body: JSON.stringify({
         message,
         content: base64Content,
         branch: this.branch,
-        ...(sha ? { sha } : {})
+        ...(currentSha ? { sha: currentSha } : {})
       })
     });
+
+    let res = await attempt();
+
+    // GitHub occasionally times out evaluating a repo rule and asks the
+    // caller to just retry (HTTP 409, "Timed out validating rule, please
+    // try again"). This is transient, not a real block — retry a couple
+    // times with a short delay before giving up for real.
+    let tries = 0;
+    while (!res.ok && res.status === 409 && tries < 2) {
+      const bodyText = await res.text();
+      if (!/timed out validating rule/i.test(bodyText)) {
+        throw new Error(`GitHub write failed for ${path}: ${bodyText}`);
+      }
+      tries++;
+      await new Promise(r => setTimeout(r, 1200 * tries));
+      res = await attempt();
+    }
+
+    // If a previous attempt partially succeeded (e.g. the photo got
+    // written but projects.json failed right after), this file may
+    // already exist. GitHub then rejects a create-without-sha with 422.
+    // Fetch its current sha and retry once as an update instead.
+    if (!res.ok && res.status === 422 && !currentSha) {
+      const bodyText = await res.text();
+      if (/sha.*wasn.?t supplied/i.test(bodyText)) {
+        const existing = await this.getFile(path);
+        currentSha = existing.sha;
+        res = await attempt();
+      } else {
+        throw new Error(`GitHub write failed for ${path}: ${bodyText}`);
+      }
+    }
+
     if (!res.ok) throw new Error(`GitHub write failed for ${path}: ${await safeText(res)}`);
     return res.json();
   }
