@@ -9,6 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="images/logo.jpg">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -166,22 +168,8 @@
       </div>
       <div class="map-grid">
         <div class="map-card">
-          <svg viewBox="0 0 500 340" fill="none">
-            <rect x="0.5" y="0.5" width="499" height="339" rx="10" fill="#fff" stroke="#e4dccb"/>
-            <g stroke="#e4dccb" stroke-width="1">
-              <path d="M40 60h420M40 130h420M40 200h420M40 270h420"/>
-              <path d="M110 20v300M210 20v300M310 20v300M410 20v300"/>
-            </g>
-            <circle cx="210" cy="170" r="115" fill="#3c5943" fill-opacity="0.07" stroke="#3c5943" stroke-opacity="0.5" stroke-width="1.4" stroke-dasharray="5 4"/>
-            <circle cx="210" cy="170" r="7" fill="#3c5943"/>
-            <text x="222" y="166" fill="#1f241f" font-family="Inter, sans-serif" font-weight="600" font-size="11">AURORA (HQ)</text>
-            <circle cx="330" cy="140" r="5" fill="#1f241f"/><text x="340" y="137" fill="#1f241f" font-family="Inter, sans-serif" font-size="11">NAPERVILLE</text>
-            <circle cx="360" cy="230" r="5" fill="#1f241f"/><text x="370" y="227" fill="#1f241f" font-family="Inter, sans-serif" font-size="11">PLAINFIELD</text>
-            <circle cx="120" cy="90" r="5" fill="#1f241f"/><text x="130" y="87" fill="#1f241f" font-family="Inter, sans-serif" font-size="11">NORTH AURORA</text>
-            <circle cx="240" cy="90" r="5" fill="#1f241f"/><text x="250" y="87" fill="#1f241f" font-family="Inter, sans-serif" font-size="11">OSWEGO</text>
-            <circle cx="420" cy="200" r="5" fill="#1f241f"/><text x="430" y="197" fill="#1f241f" font-family="Inter, sans-serif" font-size="11">BOLINGBROOK</text>
-            <text x="40" y="320" fill="#6b6459" font-family="Inter, sans-serif" font-size="9">SCHEMATIC SERVICE MAP — NOT TO SCALE</text>
-          </svg>
+          <div id="serviceMap"></div>
+
         </div>
         <div>
           <ul class="area-list">
@@ -281,6 +269,7 @@
     </div>
   </div>
 </footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script src="script.js"></script>
 </body>
