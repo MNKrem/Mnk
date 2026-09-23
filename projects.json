@@ -17,7 +17,7 @@
   },
   {
     "service": "bathroom",
-    "title": "Bath Remodel Ã¢ÂÂ Demo Phase",
+    "title": "Bath Remodel ÃÂ¢ÃÂÃÂ Demo Phase",
     "location": "",
     "folder": "bath-demo-phase",
     "count": 8,
@@ -85,14 +85,6 @@
     "location": "",
     "folder": "new-flooring-install",
     "count": 2,
-    "ext": "jpg"
-  },
-  {
-    "service": "bathroom",
-    "title": "test",
-    "location": "",
-    "folder": "test",
-    "count": 1,
     "ext": "jpg"
   },
   {
