@@ -46,7 +46,13 @@ export async function onRequestPost(context) {
     return json({ error: "Wrong admin key." }, 401);
   }
 
-  const { mode, photo } = body;
+  const { mode } = body;
+
+  if (mode === "delete") {
+    return handleDelete(body, env, branch);
+  }
+
+  const { photo } = body;
   if (!photo || typeof photo !== "string" || !photo.startsWith("data:image/")) {
     return json({ error: "Missing/invalid 'photo' (expected a data:image/... base64 URI)." }, 400);
   }
@@ -115,6 +121,40 @@ export async function onRequest(context) {
   return json({ error: "Use POST." }, 405);
 }
 
+async function handleDelete(body, env, branch) {
+  const { folder } = body;
+  if (!folder) return json({ error: "Missing 'folder' to delete." }, 400);
+
+  const gh = new GitHub(env.GITHUB_TOKEN, env.GITHUB_REPO, branch);
+
+  try {
+    const { content: projectsFile, sha: projectsSha } = await gh.getFile("projects.json");
+    const projects = JSON.parse(projectsFile);
+    const project = projects.find(p => p.folder === folder);
+    if (!project) return json({ error: `Project folder '${folder}' not found.` }, 404);
+
+    // 1. Delete every photo file in the project's folder
+    const files = await gh.listDir(`images/projects/${folder}`);
+    for (const file of files) {
+      await gh.deleteFile(file.path, file.sha, `Delete photo ${file.name} (${project.title})`);
+    }
+
+    // 2. Remove the project entry and commit the updated projects.json
+    const remaining = projects.filter(p => p.folder !== folder);
+    const updatedContent = JSON.stringify(remaining, null, 2) + "\n";
+    await gh.putFile("projects.json", b64encode(updatedContent), `Remove project ${project.title}`, projectsSha);
+
+    return json({
+      ok: true,
+      deleted: project.title,
+      photosDeleted: files.length,
+      note: "Committed to GitHub. If Pages is Git-connected, the live site updates in about a minute."
+    }, 200);
+  } catch (err) {
+    return json({ error: err.message || "Delete failed." }, 502);
+  }
+}
+
 /* ---------------- tiny GitHub Contents API client ---------------- */
 class GitHub {
   constructor(token, repo, branch) {
@@ -129,6 +169,35 @@ class GitHub {
     if (!res.ok) throw new Error(`GitHub read failed for ${path}: ${await safeText(res)}`);
     const data = await res.json();
     return { content: atob(data.content.replace(/\n/g, "")), sha: data.sha };
+  }
+  async listDir(path) {
+    const res = await fetch(`https://api.github.com/repos/${this.repo}/contents/${path}?ref=${this.branch}`, {
+      headers: this._headers()
+    });
+    if (!res.ok) throw new Error(`GitHub read failed for ${path}: ${await safeText(res)}`);
+    const data = await res.json();
+    return Array.isArray(data) ? data.map(f => ({ name: f.name, path: f.path, sha: f.sha })) : [];
+  }
+  async deleteFile(path, sha, message) {
+    const attempt = async () => fetch(`https://api.github.com/repos/${this.repo}/contents/${path}`, {
+      method: "DELETE",
+      headers: this._headers(),
+      body: JSON.stringify({ message, sha, branch: this.branch })
+    });
+
+    let res = await attempt();
+    let tries = 0;
+    while (!res.ok && res.status === 409 && tries < 2) {
+      const bodyText = await res.text();
+      if (!/timed out validating rule/i.test(bodyText)) {
+        throw new Error(`GitHub delete failed for ${path}: ${bodyText}`);
+      }
+      tries++;
+      await new Promise(r => setTimeout(r, 1200 * tries));
+      res = await attempt();
+    }
+    if (!res.ok) throw new Error(`GitHub delete failed for ${path}: ${await safeText(res)}`);
+    return res.json();
   }
   async putFile(path, base64Content, message, sha) {
     let currentSha = sha;
