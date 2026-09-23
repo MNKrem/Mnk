@@ -62,8 +62,9 @@
 
     <div class="card">
       <div class="mode-toggle">
-        <button id="modeExistingBtn" class="active" onclick="setMode('existing')">Add to existing project</button>
-        <button id="modeNewBtn" onclick="setMode('new')">Start a new project</button>
+        <button id="modeExistingBtn" class="active" onclick="setMode('existing')">Add photos</button>
+        <button id="modeNewBtn" onclick="setMode('new')">New project</button>
+        <button id="modeDeleteBtn" onclick="setMode('delete')">Delete project</button>
       </div>
 
       <div id="existingFields">
@@ -71,6 +72,14 @@
           <label for="projectSelect">Project</label>
           <select id="projectSelect"></select>
         </div>
+      </div>
+
+      <div id="deleteFields" class="hidden">
+        <div class="field">
+          <label for="deleteSelect">Project to delete</label>
+          <select id="deleteSelect"></select>
+        </div>
+        <p class="sub" style="margin-top:-4px;">This permanently removes the project and all its photos from the live site and from GitHub. It cannot be undone.</p>
       </div>
 
       <div id="newFields" class="hidden">
@@ -95,7 +104,7 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field" id="photosField">
         <label>Photos</label>
         <label class="drop" id="dropZone">
           <input type="file" id="fileInput" accept="image/*" multiple>
@@ -129,8 +138,9 @@ async function loadProjects(){
   try{
     const res = await fetch('projects.json');
     projects = await res.json();
-    const sel = document.getElementById('projectSelect');
-    sel.innerHTML = projects.map(p => `<option value="${p.folder}">${p.title} (${p.count} photo${p.count>1?'s':''})</option>`).join('');
+    const optionsHtml = projects.map(p => `<option value="${p.folder}">${p.title} (${p.count} photo${p.count>1?'s':''})</option>`).join('');
+    document.getElementById('projectSelect').innerHTML = optionsHtml;
+    document.getElementById('deleteSelect').innerHTML = optionsHtml;
   } catch(err){
     document.getElementById('lockStatus').innerHTML = `<span class="err">Couldn't load projects.json: ${err.message}</span>`;
   }
@@ -140,8 +150,14 @@ function setMode(m){
   mode = m;
   document.getElementById('modeExistingBtn').classList.toggle('active', m==='existing');
   document.getElementById('modeNewBtn').classList.toggle('active', m==='new');
+  document.getElementById('modeDeleteBtn').classList.toggle('active', m==='delete');
   document.getElementById('existingFields').classList.toggle('hidden', m!=='existing');
   document.getElementById('newFields').classList.toggle('hidden', m!=='new');
+  document.getElementById('deleteFields').classList.toggle('hidden', m!=='delete');
+  document.getElementById('photosField').classList.toggle('hidden', m==='delete');
+  const btn = document.getElementById('uploadBtn');
+  btn.textContent = m === 'delete' ? 'Delete project' : 'Upload';
+  btn.disabled = m === 'delete' ? false : selectedFiles.length === 0;
 }
 
 const fileInput = document.getElementById('fileInput');
@@ -174,6 +190,7 @@ function fileToDataUri(file){
 }
 
 uploadBtn.addEventListener('click', async ()=>{
+  if(mode === 'delete') return handleDeleteClick();
   if(selectedFiles.length === 0) return;
   uploadBtn.disabled = true;
   const statusEl = document.getElementById('uploadStatus');
@@ -229,6 +246,38 @@ uploadBtn.addEventListener('click', async ()=>{
   uploadBtn.disabled = true;
   loadProjects();
 });
+
+async function handleDeleteClick(){
+  const sel = document.getElementById('deleteSelect');
+  const folder = sel.value;
+  const label = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent : folder;
+  if(!folder) return;
+
+  const sure = confirm(`Delete "${label}" and all its photos? This cannot be undone.`);
+  if(!sure) return;
+
+  uploadBtn.disabled = true;
+  const statusEl = document.getElementById('uploadStatus');
+  statusEl.innerHTML = 'Deleting…\n';
+
+  try{
+    const res = await fetch('/api/upload-photo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode: 'delete', folder, adminKey })
+    });
+    const data = await res.json();
+    if(!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+    statusEl.innerHTML += `<span class="ok">✓ Deleted "${data.deleted}" (${data.photosDeleted} photo${data.photosDeleted>1?'s':''})</span>\n`;
+    statusEl.innerHTML += '\nDone. The live site will update automatically in about a minute.';
+  } catch(err){
+    statusEl.innerHTML += `<span class="err">✗ Failed: ${err.message}</span>\n`;
+  }
+
+  uploadBtn.disabled = false;
+  loadProjects();
+}
+
 
 document.getElementById('adminKeyInput').addEventListener('keydown', e=>{
   if(e.key === 'Enter') unlock();
