@@ -17,7 +17,7 @@
   },
   {
     "service": "bathroom",
-    "title": "Bath Remodel â Demo Phase",
+    "title": "Bath Remodel Ã¢ÂÂ Demo Phase",
     "location": "",
     "folder": "bath-demo-phase",
     "count": 8,
@@ -92,6 +92,14 @@
     "title": "test",
     "location": "",
     "folder": "test",
+    "count": 1,
+    "ext": "jpg"
+  },
+  {
+    "service": "whole-home",
+    "title": "test",
+    "location": "",
+    "folder": "test-2",
     "count": 1,
     "ext": "jpg"
   }
