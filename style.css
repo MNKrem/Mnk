@@ -171,7 +171,11 @@
   .map-grid{display:grid;gap:32px;}
   @media(min-width:860px){.map-grid{grid-template-columns:1.1fr 0.9fr;align-items:center;}}
   .map-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;}
-  .area-list{list-style:none;margin:0;padding:0;}
+  #serviceMap{height:400px;border-radius:10px;z-index:0;}
+.leaflet-popup-content-wrapper{border-radius:8px;font-family:'Inter',sans-serif;}
+.leaflet-popup-content b{font-family:'Fraunces',serif;}
+
+.area-list{list-style:none;margin:0;padding:0;}
   .area-list li{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line);font-size:14.5px;}
   .area-list li:last-child{border-bottom:none;}
   .area-list span.mi{color:var(--ink-dim);font-size:12.5px;}
