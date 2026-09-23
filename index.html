@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="images/logo.jpg">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -52,7 +51,7 @@
             <div class="stat"><b>5★</b><span>Average Rating</span></div>
           </div>
         </div>
-        <div class="photo-card photo-stone"><img width="1600" height="1066" src="images/IMG_5274.png"></div>
+        <div class="photo-card photo-stone"></div>
       </div>
     </div>
   </section>
@@ -169,7 +168,6 @@
       <div class="map-grid">
         <div class="map-card">
           <div id="serviceMap"></div>
-
         </div>
         <div>
           <ul class="area-list">
@@ -269,8 +267,19 @@
     </div>
   </div>
 </footer>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" data-lightbox-close aria-label="Close gallery">✕</button>
+  <button class="lb-nav lb-prev" data-lightbox-prev aria-label="Previous photo">‹</button>
+  <img id="lightboxImg" alt="">
+  <button class="lb-nav lb-next" data-lightbox-next aria-label="Next photo">›</button>
+  <div class="lb-caption">
+    <span id="lightboxTitle"></span>
+    <span id="lightboxCounter"></span>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

@@ -1,0 +1,90 @@
+[
+  {
+    "service": "bathroom",
+    "title": "Primary Suite Remodel",
+    "location": "Aurora, IL",
+    "folder": "primary-suite-remodel",
+    "count": 13,
+    "ext": "jpg"
+  },
+  {
+    "service": "bathroom",
+    "title": "Guest Bath Update",
+    "location": "",
+    "folder": "guest-bath-update",
+    "count": 13,
+    "ext": "jpg"
+  },
+  {
+    "service": "bathroom",
+    "title": "Bath Remodel — Demo Phase",
+    "location": "",
+    "folder": "bath-demo-phase",
+    "count": 8,
+    "ext": "jpg"
+  },
+  {
+    "service": "bathroom",
+    "title": "Double-Vanity Bath",
+    "location": "",
+    "folder": "double-vanity-bath",
+    "count": 11,
+    "ext": "jpg"
+  },
+  {
+    "service": "bathroom",
+    "title": "Tub & Shower Refresh",
+    "location": "",
+    "folder": "tub-shower-refresh",
+    "count": 6,
+    "ext": "jpg"
+  },
+  {
+    "service": "bathroom",
+    "title": "Classic Bath Update",
+    "location": "",
+    "folder": "classic-bath-update",
+    "count": 5,
+    "ext": "jpg"
+  },
+  {
+    "service": "kitchen",
+    "title": "Modern Marble Kitchen",
+    "location": "",
+    "folder": "modern-marble-kitchen",
+    "count": 1,
+    "ext": "jpg"
+  },
+  {
+    "service": "kitchen",
+    "title": "Bright White Kitchen",
+    "location": "",
+    "folder": "bright-white-kitchen",
+    "count": 2,
+    "ext": "jpg"
+  },
+  {
+    "service": "carpentry",
+    "title": "Living & Dining Room Update",
+    "location": "",
+    "folder": "living-dining-update",
+    "count": 2,
+    "ext": "jpg"
+  },
+  {
+    "service": "carpentry",
+    "title": "Stairs & Fireplace Refresh",
+    "location": "",
+    "folder": "stairs-fireplace-refresh",
+    "count": 4,
+    "ext": "jpg"
+  },
+  {
+    "service": "flooring",
+    "title": "New Flooring Install",
+    "location": "",
+    "folder": "new-flooring-install",
+    "count": 2,
+    "ext": "jpg"
+  }
+]

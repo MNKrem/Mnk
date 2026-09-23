@@ -1,35 +1,66 @@
 # MNK Remodeling — website
 
 ## Structure
-- `index.html`, `style.css`, `script.js` — the site
-- `images/` — real project photos (see images/README.md — bathroom, flooring
-  and carpentry have real photos; kitchen/basement/whole-home are still
-  placeholders until real photos exist)
-- `images/logo.jpg` — real MNK Remodeling logo, used in header/footer/favicon
-- `functions/api/quote.js` — receives the quote form, sends it to MNK's own Telegram bot
-- `functions/api/ai-design.js` — AI Design Preview backend (Google Gemini 2.5 Flash Image / "Nano Banana")
+- `index.html`, `style.css`, `script.js` — the public site
+- `admin.html` — **upload page for adding new project photos** (not linked
+  from the site's nav — bookmark it directly: yoursite.com/admin.html)
+- `projects.json` — the data behind every project card + gallery. You
+  normally never edit this by hand anymore — admin.html does it for you.
+- `images/projects/<folder>/1.jpg, 2.jpg, ...` — project photos
+- `images/logo.jpg` — real MNK Remodeling logo (header/footer/favicon)
+- `functions/api/quote.js` — quote form -> MNK's own Telegram bot
+- `functions/api/ai-design.js` — AI Design Preview backend (Google Gemini
+  2.5 Flash Image / "Nano Banana")
+- `functions/api/upload-photo.js` — backend for admin.html: commits
+  photos + updated projects.json straight to this GitHub repo
 
-Both `functions/api/*` files are Cloudflare Pages Functions — they deploy
-automatically as part of this same project. No separate Worker, no
-separate URL, no separate account.
+## Adding project photos (for your friend — no coding)
+1. Go to yoursite.com/admin.html
+2. Enter the admin key
+3. Pick "Add to existing project" (choose from dropdown) or
+   "Start a new project" (pick a service, type a title)
+4. Choose one or more photos, hit Upload
+Done — it commits directly to GitHub. If this Pages project is connected
+via Git (see Deploy below), the live site redeploys itself automatically,
+usually within a minute.
 
-## Deploy
-1. Cloudflare Dashboard -> Workers & Pages -> Create -> Pages -> Upload assets
-   (or connect this folder as a Git repo for auto-deploy on push)
-2. Upload everything in this folder (keep the `functions/` folder structure intact)
-3. Settings -> Environment variables -> add (Production AND Preview):
-   - TELEGRAM_BOT_TOKEN   (from @BotFather in Telegram — a NEW bot for
-     this project, separate from any other project's bot)
-   - TELEGRAM_CHAT_ID     (see comment at the top of functions/api/quote.js
-     for how to find it)
-   - GEMINI_API_KEY       (free, no card, from aistudio.google.com/apikey)
-4. Redeploy after adding the variables (they only apply to deploys made
-   after they're set)
+## One-time setup for the upload page to work
+This requires the site to be deployed via a GitHub repo connected to
+Cloudflare Pages (Git integration), not drag-and-drop upload — the
+upload page commits directly to that repo.
+
+1. Push this whole folder to a GitHub repo (create one if you don't have
+   it yet: github.com -> New repository)
+2. Cloudflare Pages -> your project -> Settings -> Builds & deployments
+   -> connect it to that GitHub repo (or create the Pages project fresh
+   via "Connect to Git" instead of "Upload assets")
+3. Create a GitHub Personal Access Token:
+   github.com/settings/tokens -> "Fine-grained tokens" -> Generate new
+   -> restrict it to this ONE repository -> under "Repository permissions"
+   set Contents = Read and write -> Generate, copy the token
+4. Cloudflare Pages -> Settings -> Environment variables -> add
+   (Production AND Preview):
+   - GITHUB_TOKEN   = the token from step 3
+   - GITHUB_REPO    = your-github-username/your-repo-name
+   - GITHUB_BRANCH  = main (or whatever branch Pages deploys from)
+   - ADMIN_KEY      = make up any password — this is what admin.html asks for
+   - TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID  (for the quote form)
+   - GEMINI_API_KEY  (for AI Design Preview)
+5. Redeploy after adding the variables
+
+## First-pass photo grouping — please sanity-check
+I grouped your ~90 photos into 11 projects by what looked like the same
+room across consecutive camera-roll shots. I could not tell which
+specific client/address each belongs to, or whether any grouping
+actually mixes two different jobs — the files were just a continuous
+timestamped dump with no other labels. Generic titles like "Guest Bath
+Update" are placeholders. Easiest fix now: open admin.html, and for
+anything mislabeled, it's simplest to just leave the existing entry as
+extra photos of "whatever project it's closest to" going forward, and
+rename titles/locations by editing projects.json directly (plain text,
+still easy) for the historical batch.
 
 ## Before going live
-- Phone/email in the footer and contact section are placeholders — update them
-- Kitchen/Basement/Whole-Home still need real photos (see images/README.md)
-- Photo file sizes: real iPhone photos, 100-250KB each, ~90 total in the
-  folder you sent — fine for the web as-is, but worth running through an
-  image compressor (e.g. squoosh.app) before final launch if page load
-  speed matters
+- Phone/email placeholders in the footer/contact section — update them
+- Basement/Whole-Home have no real projects yet — add via admin.html once
+  there are photos

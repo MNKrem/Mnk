@@ -1,4 +1,8 @@
 document.getElementById('yr').textContent = new Date().getFullYear();
+
+let PROJECTS = [];
+
+/* ---------------- service area map (Leaflet + OpenStreetMap) ---------------- */
 const HQ = [41.7606, -88.3201]; // Aurora, IL
 const towns = [
   { name: 'Naperville', pos: [41.7508, -88.1535], mi: '~9 mi' },
@@ -14,8 +18,11 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(serviceMap);
 
+// Reads the site's --accent color straight from style.css, so changing
+// the accent color there also changes the map circle — no need to edit it twice.
 const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#3c5943';
 
+// ~15 mile service radius around HQ, in meters
 L.circle(HQ, {
   radius: 15 * 1609.34,
   color: accentColor,
@@ -46,14 +53,7 @@ const services = [
       "Typical scope includes: demo, rough plumbing and electrical relocation, waterproofing, custom tile (floor, shower walls, niches), vanity and countertop installation, glass shower enclosures, ventilation upgrades, and heated-floor rough-in on request. Most full bathroom renovations run 3–5 weeks depending on tile complexity and whether walls are moving.",
       "Powder rooms and guest baths are handled the same way at a smaller scale — usually 1–2 weeks, often without moving plumbing at all — for homeowners who want the finish quality without a full-gut budget."
     ],
-    tags:['Waterproofing','Custom tile','Fixtures & glass','Permits','Heated floors (optional)'],
-    gallery:[
-      {ph:'ph-1', cap:'Spa-Style Primary Bath', sub:'Full-height marble slab shower, freestanding tub, pebble tile floor'},
-      {ph:'ph-1', cap:'Tiled Shower Detail', sub:'Waterfall shower head, recessed niches, black fixtures'},
-      {ph:'ph-6', cap:'Double-Vanity Refresh', sub:'Bookmatched stone backsplash, brass fixtures and mirrors'},
-      {ph:'ph-6', cap:'Tub-and-Shower Combo', sub:'New tub, large-format tile, updated vanity'},
-      {ph:'ph-1', cap:'Full Gut, Mid-Demo', sub:'Down to the studs before waterproofing and re-framing'}
-    ]
+    tags:['Waterproofing','Custom tile','Fixtures & glass','Permits','Heated floors (optional)']
   },
   {
     id:'kitchen', num:'02', title:'Kitchen Remodeling', ph:'ph-2',
@@ -65,10 +65,7 @@ const services = [
       "Scope typically covers: cabinetry (semi-custom or fully custom), countertops (quartz, granite, butcher block), tile or slab backsplash, under-cabinet and recessed lighting, appliance integration (including panel-ready fridges and hidden hoods), and plumbing/electrical relocation for islands or peninsulas.",
       "A full kitchen remodel generally runs 4–7 weeks. Cabinet refacing or a countertop-and-backsplash refresh without layout changes can be done in 1–2 weeks for homeowners not ready for a full rebuild."
     ],
-    tags:['Cabinetry','Countertops','Lighting','Appliance integration','Wall removal'],
-    gallery:[
-      {ph:'ph-2', cap:'Open-Concept Kitchen', sub:'Wall removal, custom cabinetry, quartz surfaces, integrated lighting'}
-    ]
+    tags:['Cabinetry','Countertops','Lighting','Appliance integration','Wall removal']
   },
   {
     id:'basement', num:'03', title:'Basement Finishing', ph:'ph-3',
@@ -80,10 +77,7 @@ const services = [
       "A typical build includes: framing, insulation, drywall, egress window coordination where a bedroom is planned, electrical circuits and lighting, flooring (usually LVP or carpet tile for moisture tolerance), a full or half bathroom, and built-in storage or a wet bar on request.",
       "Most finished basements run 6–10 weeks depending on square footage and whether a bathroom is included. We pull the required permits and schedule inspections at each stage rather than treating it as unpermitted work — it matters for resale and for insurance."
     ],
-    tags:['Insulation & framing','Electrical & HVAC','Egress & permits','Millwork'],
-    gallery:[
-      {ph:'ph-3', cap:'Basement to Living Space', sub:'Insulation, drywall, flooring, built-in shelving, full electrical'}
-    ]
+    tags:['Insulation & framing','Electrical & HVAC','Egress & permits','Millwork']
   },
   {
     id:'carpentry', num:'04', title:'Custom Carpentry', ph:'ph-5',
@@ -95,11 +89,7 @@ const services = [
       "Every piece is built to the room's actual dimensions on-site or in our shop and finished (painted, stained, or clear-coated) to match existing woodwork — no pre-fab units caulked into an approximate gap.",
       "Smaller carpentry projects (a single built-in, a trim package for one room) typically run 3–7 days. Whole-house trim and multiple built-ins are scheduled alongside a larger remodel or as their own 2–3 week project."
     ],
-    tags:['Built-ins','Trim & molding','Custom storage','Profile matching'],
-    gallery:[
-      {ph:'ph-5', cap:'Floating Media Wall', sub:'Custom slatted accent wall with built-in console and backlighting'},
-      {ph:'ph-5', cap:'Staircase & Railing Rebuild', sub:'New oak treads, painted risers, and matching handrail'}
-    ]
+    tags:['Built-ins','Trim & molding','Custom storage','Profile matching']
   },
   {
     id:'flooring', num:'05', title:'Flooring &amp; Tile', ph:'ph-4',
@@ -111,11 +101,7 @@ const services = [
       "Scope includes subfloor leveling and repair, moisture testing and vapor barriers where needed, transitions between rooms and flooring types, baseboard removal and reinstallation, and disposal of old flooring and adhesive.",
       "A single room typically runs 2–4 days once the subfloor is confirmed sound; whole-floor replacements or extensive subfloor repair extend to 1–2 weeks. We can usually match existing hardwood for partial repairs rather than requiring a full-room replacement."
     ],
-    tags:['Hardwood & LVP','Tile & stone','Subfloor prep','Radiant heat (optional)'],
-    gallery:[
-      {ph:'ph-4', cap:'Primary Bath Tile Floor', sub:'Large-format porcelain plank, precision-laid in a herringbone-adjacent pattern'},
-      {ph:'ph-4', cap:'Hallway Hardwood', sub:'New engineered hardwood through the upstairs hallway and staircase'}
-    ]
+    tags:['Hardwood & LVP','Tile & stone','Subfloor prep','Radiant heat (optional)']
   },
   {
     id:'whole-home', num:'06', title:'Whole-Home Remodeling', ph:'ph-4',
@@ -127,10 +113,7 @@ const services = [
       "We handle the full sequence: structural modifications and permits, rough plumbing and electrical across all affected rooms, insulation and drywall, flooring transitions between spaces, cabinetry and built-ins, and a single finish pass (paint, trim, hardware) so the whole home reads as one project rather than several stitched together.",
       "Timelines vary widely by scope — a two-bathroom-plus-kitchen remodel typically runs 8–14 weeks. We provide a room-by-room schedule up front so you know which parts of the house are usable at each stage."
     ],
-    tags:['Multi-room coordination','Structural work','Full interior updates','Single project lead'],
-    gallery:[
-      {ph:'ph-4', cap:'Full Home Transformation', sub:'Two bathrooms, kitchen, flooring, and trim throughout'}
-    ]
+    tags:['Multi-room coordination','Structural work','Full interior updates','Single project lead']
   }
 ];
 
@@ -200,18 +183,12 @@ pagesRoot.innerHTML = services.map(s=>`
             <h1>${s.title}</h1>
           </div>
         </div>
-        <div class="photo-card ${s.ph}" style="aspect-ratio:16/6;margin-top:24px;"><img src="images/services/${s.id}-hero.jpg" alt="${s.title}" onerror="this.remove()"></div>
+        <div class="photo-card ${s.ph}" style="aspect-ratio:16/6;margin-top:24px;"><img src="${firstProjectCover(s.id) || `images/services/${s.id}-hero.jpg`}" alt="${s.title}" onerror="this.remove()"></div>
         <div class="svc-body">${s.body.map(p=>`<p>${p}</p>`).join('')}</div>
         <div class="svc-tags">${s.tags.map(t=>`<span>${t}</span>`).join('')}</div>
 
-        <div class="gallery-head"><h2>Recent ${s.title.toLowerCase()} work</h2></div>
-        <div class="gallery">
-          ${s.gallery.map((g,i)=>`
-            <div class="work-card">
-              <div class="work-photo ${g.ph}"><img src="images/services/${s.id}-${i+1}.jpg" alt="${g.cap}" onerror="this.remove()"></div>
-              <div class="work-body"><h3>${g.cap}</h3><p>${g.sub}</p></div>
-            </div>`).join('')}
-        </div>
+        <div class="gallery-head"><h2>Our ${s.title.toLowerCase()} projects</h2></div>
+        <div class="projects-grid" data-projects-for="${s.id}"></div>
 
         <div class="cta-band">
           <p>Ready to talk through your ${s.title.toLowerCase()} project?</p>
@@ -227,6 +204,91 @@ pagesRoot.innerHTML = services.map(s=>`
       </div>
     </section>
   </div>`).join('');
+
+/* ---------------- projects & lightbox gallery ---------------- */
+function projectPhotos(p){
+  return Array.from({length:p.count}, (_,i)=> `images/projects/${p.folder}/${i+1}.${p.ext}`);
+}
+function firstProjectCover(serviceId){
+  const p = PROJECTS.find(p=>p.service===serviceId);
+  return p ? projectPhotos(p)[0] : null;
+}
+
+function renderAllProjectGrids(){
+  document.querySelectorAll('[data-projects-for]').forEach(container=>{
+    const serviceId = container.getAttribute('data-projects-for');
+    const list = PROJECTS.filter(p=>p.service===serviceId);
+    if(list.length === 0){
+      container.innerHTML = `<p class="no-projects">Photos of completed ${serviceId} projects are coming soon.</p>`;
+      return;
+    }
+    container.innerHTML = list.map((p)=>{
+      const photos = projectPhotos(p);
+      const globalIndex = PROJECTS.indexOf(p);
+      return `
+        <button class="project-card" data-open-gallery="${globalIndex}">
+          <div class="project-cover"><img src="${photos[0]}" alt="${p.title}" loading="lazy"></div>
+          <div class="project-body">
+            <h3>${p.title}</h3>
+            ${p.location ? `<p class="project-loc">${p.location}</p>` : ''}
+            <span class="project-count">${photos.length} photo${photos.length>1?'s':''} · View gallery</span>
+          </div>
+        </button>`;
+    }).join('');
+  });
+}
+
+fetch('projects.json')
+  .then(r => r.json())
+  .then(data => { PROJECTS = data; renderAllProjectGrids(); })
+  .catch(() => {
+    document.querySelectorAll('[data-projects-for]').forEach(c=>{
+      c.innerHTML = `<p class="no-projects">Couldn't load projects right now.</p>`;
+    });
+  });
+
+let galleryPhotos = [];
+let galleryIndex = 0;
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxCounter = document.getElementById('lightboxCounter');
+const lightboxTitle = document.getElementById('lightboxTitle');
+
+function openGallery(projectIdx, startAt){
+  const p = PROJECTS[projectIdx];
+  if(!p) return;
+  galleryPhotos = projectPhotos(p);
+  galleryIndex = startAt || 0;
+  lightboxTitle.textContent = p.title;
+  showGalleryPhoto();
+  lightbox.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeGallery(){
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function showGalleryPhoto(){
+  lightboxImg.src = galleryPhotos[galleryIndex];
+  lightboxCounter.textContent = `${galleryIndex+1} / ${galleryPhotos.length}`;
+}
+function nextGalleryPhoto(){ galleryIndex = (galleryIndex+1) % galleryPhotos.length; showGalleryPhoto(); }
+function prevGalleryPhoto(){ galleryIndex = (galleryIndex-1+galleryPhotos.length) % galleryPhotos.length; showGalleryPhoto(); }
+
+document.addEventListener('click', e=>{
+  const openBtn = e.target.closest('[data-open-gallery]');
+  if(openBtn){ openGallery(parseInt(openBtn.getAttribute('data-open-gallery'), 10), 0); return; }
+  if(e.target.closest('[data-lightbox-close]')){ closeGallery(); return; }
+  if(e.target.closest('[data-lightbox-next]')){ nextGalleryPhoto(); return; }
+  if(e.target.closest('[data-lightbox-prev]')){ prevGalleryPhoto(); return; }
+  if(e.target === lightbox){ closeGallery(); }
+});
+document.addEventListener('keydown', e=>{
+  if(!lightbox.classList.contains('open')) return;
+  if(e.key === 'Escape') closeGallery();
+  if(e.key === 'ArrowRight') nextGalleryPhoto();
+  if(e.key === 'ArrowLeft') prevGalleryPhoto();
+});
 
 /* ---------------- router ---------------- */
 const homePage = document.getElementById('page-home');
