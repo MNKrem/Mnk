@@ -19,18 +19,25 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(serviceMap);
 
 // Reads the site's --accent color straight from style.css, so changing
-// the accent color there also changes the map circle — no need to edit it twice.
+// the accent color there also changes the map shading — no need to edit it twice.
 const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#3c5943';
 
-// ~15 mile service radius around HQ, in meters
-L.circle(HQ, {
-  radius: 15 * 1609.34,
-  color: accentColor,
-  weight: 1.5,
-  dashArray: '6 5',
-  fillColor: accentColor,
-  fillOpacity: 0.06
-}).addTo(serviceMap);
+// Service area is a real editable shape, not a plain radius circle.
+// To change it: draw your own area on https://geojson.io (free, no signup),
+// Export -> GeoJSON, and replace service-area.geojson with what you get.
+fetch('service-area.geojson')
+  .then(r => r.json())
+  .then(geo => {
+    L.geoJSON(geo, {
+      style: {
+        color: accentColor,
+        weight: 2,
+        fillColor: accentColor,
+        fillOpacity: 0.18
+      }
+    }).addTo(serviceMap);
+  })
+  .catch(() => { /* map still works with just the markers below if this fails */ });
 
 L.marker(HQ).addTo(serviceMap)
   .bindPopup('<b>MNK Remodeling</b><br>Aurora, IL — home base')
@@ -493,5 +500,3 @@ generateBtn.addEventListener('click', async ()=>{
 
 /* run the initial route only after every listener above is wired up */
 route();
-
-
