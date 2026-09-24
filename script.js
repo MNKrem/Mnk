@@ -137,7 +137,7 @@ navHtml += `
     <svg class="ic" viewBox="0 0 48 48" fill="none"><path d="M24 5c8 0 13 6.2 13 13.4C37 29 24 43 24 43S11 29 11 18.4C11 11.2 16 5 24 5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="24" cy="18" r="4.5" stroke="currentColor" stroke-width="2"/></svg>
     <div><h3>Service Area</h3><p>Aurora, Naperville and the western suburbs.</p></div>
   </button>
-  <a href="#/contact" class="btn btn-primary nav-cta" data-nav="/contact">Get a Quote</a>`;
+  <a href="#/contact" class="btn btn-primary nav-cta" data-nav="/#contact">Get a Quote</a>`;
 navList.innerHTML = navHtml;
 
 /* ---------------- selected work ---------------- */
@@ -192,7 +192,7 @@ pagesRoot.innerHTML = services.map(s=>`
 
         <div class="cta-band">
           <p>Ready to talk through your ${s.title.toLowerCase()} project?</p>
-          <a href="#/contact" class="btn btn-primary" data-nav="/contact">Get a Quote</a>
+          <a href="#/contact" class="btn btn-primary" data-nav="/#contact">Get a Quote</a>
         </div>
 
         <div class="related">
@@ -289,6 +289,23 @@ document.addEventListener('keydown', e=>{
   if(e.key === 'ArrowRight') nextGalleryPhoto();
   if(e.key === 'ArrowLeft') prevGalleryPhoto();
 });
+
+/* swipe support for the lightbox on touch devices */
+let touchStartX = null;
+let touchStartY = null;
+lightbox.addEventListener('touchstart', e=>{
+  touchStartX = e.changedTouches[0].clientX;
+  touchStartY = e.changedTouches[0].clientY;
+}, {passive:true});
+lightbox.addEventListener('touchend', e=>{
+  if(touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  touchStartX = null;
+  // ignore mostly-vertical swipes so scrolling isn't hijacked
+  if(Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+  if(dx < 0) nextGalleryPhoto(); else prevGalleryPhoto();
+}, {passive:true});
 
 /* ---------------- router ---------------- */
 const homePage = document.getElementById('page-home');
@@ -476,3 +493,5 @@ generateBtn.addEventListener('click', async ()=>{
 
 /* run the initial route only after every listener above is wired up */
 route();
+
+
